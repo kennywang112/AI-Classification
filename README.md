@@ -16,4 +16,5 @@ run with `uvicorn web.run:app --reload`
 
 ## Ref
 1. Website: https://www.youtube.com/watch?v=0BEBquff6rI
-2. GA4: https://hackmd.io/15X08z7DSz-pSctKHLAn3Q
+2. GA4 tag: https://github.com/gradio-app/gradio/issues/5954
+3. GA4 note: https://hackmd.io/15X08z7DSz-pSctKHLAn3Q

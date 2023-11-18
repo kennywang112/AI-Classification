@@ -170,23 +170,22 @@ def Reply(imagebox, message, chat_history):
 title = """<h1 align="center">AI臉部辨識</h1>"""
 textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
 
-with gr.Blocks(css = """.gradio-container {background-color: #3f7791}""") as demo:
+ga_script = '''
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-Y132VVZPKL');
+</script>
+'''
+
+with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo:
     
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
-    gr.HTML('''
-        <head>
-            <!-- Google tag (gtag.js) -->
-            <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
-            <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-Y132VVZPKL');
-            </script>
-        </head>
-    ''')
 
     state = gr.State()
     
