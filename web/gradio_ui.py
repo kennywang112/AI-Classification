@@ -11,10 +11,6 @@ import cv2
 import time
 import base64
 import io
-from torch import nn
-from huggingface_hub import hf_hub_download
-import torch
-from torchvision.utils import save_image
 
 
 with open('./data/texes.txt', 'r', encoding='utf-8') as fh:
