@@ -20,3 +20,7 @@ run with `uvicorn web.run:app --reload`
 3. GA4 note: https://hackmd.io/15X08z7DSz-pSctKHLAn3Q
 4. GA4 issue: https://github.com/gradio-app/gradio/issues/6426
 5. GAN implementation: https://github.com/bryandlee/animegan2-pytorch/blob/main/demo.ipynb
+
+### Website
+
+https://ai-classification.onrender.com/gradio/
