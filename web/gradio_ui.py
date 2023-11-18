@@ -11,6 +11,11 @@ import cv2
 import time
 import base64
 import io
+from torch import nn
+from huggingface_hub import hf_hub_download
+import torch
+from torchvision.utils import save_image
+
 
 with open('./data/texes.txt', 'r', encoding='utf-8') as fh:
     tmp = fh.read()
@@ -83,12 +88,13 @@ def chatbtn(content):
 
 def display_image_from_video(video):
 
-    capture_image = cv.VideoCapture(video) 
+    capture_image = cv2.VideoCapture(video)
+    print(capture_image)
     # 獲取視頻中的一幀，變數分別為是否成功讀取了一幀以及捕獲的圖像幀
     ret, frame = capture_image.read()
 
-    img = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-    img = cv.resize(img, (256, 256))  # 調整大小
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, (256, 256))  # 調整大小
     img_for_plot = img / 255.0  # 正規化圖像
     
     img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
@@ -166,10 +172,12 @@ def Reply(imagebox, message, chat_history):
     
     return "", chat_history
 
+# GAN
+
 
 title = """<h1 align="center">AI臉部辨識</h1>"""
 textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
-
+# <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
 ga_script = '''
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
@@ -182,7 +190,86 @@ gtag('config', 'G-Y132VVZPKL');
 </script>
 '''
 
-with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo:
+# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
+    
+#     gr.HTML(title)
+#     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
+
+#     state = gr.State()
+    
+#     with gr.Row():
+        
+#         with gr.Column(scale=3):
+
+#             # for image
+#             imagebox = gr.Image(type="pil")
+#             outputs = gr.components.Text()
+#             img_clk = gr.Button('判斷圖像')
+#             img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
+#             image_process_mode = gr.Radio(
+#                 ["Crop", "Resize", "Pad", "Default"],
+#                 value="Default",
+#                 label="Preprocess for non-square image", visible=False)
+#             cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+
+#             ex = gr.Examples(examples=[
+#                 [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
+#                 [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
+#                 [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
+#             ], inputs = [imagebox, textbox])
+
+#             pic = gr.Button('拍照')
+#             pic.click(take_pic)
+            
+#         # with gr.Column(scale=2):
+            
+#         #     # video
+#         #     inputs = gr.components.Video()
+#         #     outputs = gr.components.Text()
+#         #     update = gr.Button('判斷影片圖像')
+#         #     update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
+            
+#         #     pic = gr.Button('拍照')
+#         #     pic.click(take_pic)
+            
+#         with gr.Column(scale=7):
+            
+#             chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=800)
+            
+#             with gr.Row():
+                    
+#                 with gr.Column(scale=1, min_width=50):
+#                     msg = textbox.render()
+
+#         # chatbox
+#         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
+
+with gr.Blocks() as small_block1:
+
+    imagebox = gr.Image(type="pil")
+    outputs = gr.components.Text()
+    img_clk = gr.Button('判斷圖像')
+    img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
+    image_process_mode = gr.Radio(
+        ["Crop", "Resize", "Pad", "Default"],
+        value="Default",
+        label="Preprocess for non-square image", visible=False)
+    cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+
+    ex = gr.Examples(examples=[
+        [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
+        [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
+        [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
+    ], inputs = [imagebox, textbox])
+
+with gr.Blocks() as small_block2:
+
+    inputs = gr.components.Video()
+    outputs = gr.components.Text()
+    update = gr.Button('判斷影片圖像')
+    update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
+
+with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
     
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
@@ -191,11 +278,40 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
     
     with gr.Row():
         
-        with gr.Column(scale=2):
+        with gr.Column(scale=3):
 
+            gr.TabbedInterface([small_block1, small_block2],["圖片", "影片"])
+
+            pic = gr.Button('拍照')
+            pic.click(take_pic)
+            
+        with gr.Column(scale=7):
+            
+            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=800)
+            
+            with gr.Row():
+                    
+                with gr.Column(scale=1, min_width=50):
+                    msg = textbox.render()
+
+        # chatbox
+        msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
+
+
+with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
+    
+    gr.HTML(title)
+    gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
+
+    state = gr.State()
+    
+    with gr.Row():
+         
+        with gr.Column(scale = 5):
+            
             # for image
             imagebox = gr.Image(type="pil")
-            outputs = gr.components.Text()
+            outputs = gr.components.Image()
             img_clk = gr.Button('判斷圖像')
             img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
             image_process_mode = gr.Radio(
@@ -207,28 +323,11 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
             ex = gr.Examples(examples=[
                 [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
                 [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
-                [f"{cur_dir}/images/GeeksForGeeks.png", "形容這張圖片"],
+                [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
             ], inputs = [imagebox, textbox])
-            
-        with gr.Column(scale=2):
-            
-            # video
-            inputs = gr.components.Video()
-            outputs = gr.components.Text()
-            update = gr.Button('判斷影片圖像')
-            update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
-            
-            pic = gr.Button('拍照')
-            pic.click(take_pic)
-            
-        with gr.Column(scale=6):
-            
-            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=550)
-            
-            with gr.Row():
-                    
-                with gr.Column(scale=1, min_width=50):
-                    msg = textbox.render()
 
-        # chatbox
-        msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
+
+
+# full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
+
+full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
