@@ -8,5 +8,6 @@
 run with `uvicorn web.run:app --reload`
 
 ## Deploy on website
-1. go to https://dashboard.render.com/web/new
+1. Go to https://dashboard.render.com/web/new
 2. Start command: `uvicorn web.run:app --host 0.0.0.0 --port 5000`
+3. Add Python version in additional
