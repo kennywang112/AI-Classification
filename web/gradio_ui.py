@@ -175,15 +175,17 @@ with gr.Blocks(css = """.gradio-container {background-color: #3f7791}""") as dem
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
     gr.HTML('''
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
-        <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+        <head>
+            <!-- Google tag (gtag.js) -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
+            <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-        gtag('config', 'G-Y132VVZPKL');
-        </script>
+            gtag('config', 'G-Y132VVZPKL');
+            </script>
+        </head>
     ''')
 
     state = gr.State()
