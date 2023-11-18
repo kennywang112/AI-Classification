@@ -1,5 +1,5 @@
 gradio==4.4.1
-gradio_client==0.6.1
+gradio_client==0.7.0
 imageio==2.9.0
 json5==0.9.6
 jsonpath==0.82
