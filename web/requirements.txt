@@ -14,7 +14,7 @@ Keras-Preprocessing==1.1.2
 keras-self-attention==0.51.0
 numpy==1.21.5
 numpydoc==1.2
-openai==0.28
+openai==0.28.1
 opencv-contrib-python==4.7.0.68
 opencv-python==4.7.0.68
 Pillow==9.0.1
