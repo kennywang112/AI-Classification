@@ -109,8 +109,8 @@ def display_image_from_video(video):
     return img_for_plot
 
 def take_pic():  
-    # cam_port = 0
-    cam = cv2.VideoCapture(0) 
+    cam_port = 0
+    cam = cv2.VideoCapture(cam_port) 
     # reading the input using the camera 
     result, image = cam.read() 
     # If image will detected without any error,  
@@ -118,9 +118,9 @@ def take_pic():
     if result: 
         # showing result, it take frame name and image  
         # output 
-        cv2.imshow("../images/GeeksForGeeks", image) 
+        cv2.imshow("images/GeeksForGeeks", image) 
         # saving image in local storage 
-        # cv2.imwrite("../images/GeeksForGeeks.png", image) 
+        cv2.imwrite("images/GeeksForGeeks.png", image) 
         # If keyboard interrupt occurs, destroy image  
         # window 
         # cv2.waitKey(0) 
