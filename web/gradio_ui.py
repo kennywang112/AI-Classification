@@ -11,6 +11,7 @@ import cv2
 import time
 import base64
 import io
+import torch
 
 
 with open('./data/texes.txt', 'r', encoding='utf-8') as fh:
@@ -170,6 +171,17 @@ def Reply(imagebox, message, chat_history):
 
 # GAN
 
+model = torch.hub.load("AK391/animegan2-pytorch:main", "generator", pretrained="face_paint_512_v1")
+face2paint = torch.hub.load(
+    'AK391/animegan2-pytorch:main', 'face2paint', 
+    size=512,side_by_side=False
+)
+
+def inference(img):
+    
+    out = face2paint(model, img)
+
+    return out
 
 title = """<h1 align="center">AI臉部辨識</h1>"""
 textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
@@ -304,12 +316,12 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
     with gr.Row():
          
         with gr.Column(scale = 5):
-            
+
             # for image
             imagebox = gr.Image(type="pil")
             outputs = gr.components.Image()
             img_clk = gr.Button('判斷圖像')
-            img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
+            img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
             image_process_mode = gr.Radio(
                 ["Crop", "Resize", "Pad", "Default"],
                 value="Default",
