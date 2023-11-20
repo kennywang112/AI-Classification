@@ -40,3 +40,4 @@ tensorflow-estimator==2.9.0
 tensorflow-hub==0.12.0
 tensorflow-io-gcs-filesystem==0.26.0
 torch==1.12.0
+torchvision==0.16.1
