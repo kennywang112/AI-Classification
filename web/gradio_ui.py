@@ -62,10 +62,39 @@ def pred(img):
 
 def image_mod(img):
     
+    print(img)
     image, predictions = pred(img)
 
     print(predictions)
     
+    result = ""
+    
+    if predictions[0][0] < 0.5:
+
+        result = "fake image"
+    else :
+        
+        result = "true image"
+
+    return result
+
+def pred_v2(img_np):
+
+    img_np = cv2.resize(img_np, (256, 256))
+    
+    img_for_plot = img_np / 255.0  # Normalize the image if necessary
+    
+    img_np = np.expand_dims(img_np, axis=0)  # Add a batch dimension
+    
+    # Make predictions
+    predictions = loaded_model.predict(img_np)
+    
+    return img_for_plot, predictions
+
+def image_mod_v2(img):
+
+    image, predictions = pred_v2(img)
+
     result = ""
     
     if predictions[0][0] < 0.5:
@@ -199,63 +228,9 @@ gtag('config', 'G-Y132VVZPKL');
 </script>
 '''
 
-# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
-    
-#     gr.HTML(title)
-#     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
-
-#     state = gr.State()
-    
-#     with gr.Row():
-        
-#         with gr.Column(scale=3):
-
-#             # for image
-#             imagebox = gr.Image(type="pil")
-#             outputs = gr.components.Text()
-#             img_clk = gr.Button('判斷圖像')
-#             img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
-#             image_process_mode = gr.Radio(
-#                 ["Crop", "Resize", "Pad", "Default"],
-#                 value="Default",
-#                 label="Preprocess for non-square image", visible=False)
-#             cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
-
-#             ex = gr.Examples(examples=[
-#                 [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
-#                 [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
-#                 [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
-#             ], inputs = [imagebox, textbox])
-
-#             pic = gr.Button('拍照')
-#             pic.click(take_pic)
-            
-#         # with gr.Column(scale=2):
-            
-#         #     # video
-#         #     inputs = gr.components.Video()
-#         #     outputs = gr.components.Text()
-#         #     update = gr.Button('判斷影片圖像')
-#         #     update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
-            
-#         #     pic = gr.Button('拍照')
-#         #     pic.click(take_pic)
-            
-#         with gr.Column(scale=7):
-            
-#             chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=800)
-            
-#             with gr.Row():
-                    
-#                 with gr.Column(scale=1, min_width=50):
-#                     msg = textbox.render()
-
-#         # chatbox
-#         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
-
 with gr.Blocks() as small_block1:
 
-    imagebox = gr.Image(type="pil")
+    imagebox = gr.Image(type="pil", height=250)
     outputs = gr.components.Text()
     img_clk = gr.Button('判斷圖像')
     img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
@@ -273,7 +248,7 @@ with gr.Blocks() as small_block1:
 
 with gr.Blocks() as small_block2:
 
-    inputs = gr.components.Video()
+    inputs = gr.components.Video(height=400)
     outputs = gr.components.Text()
     update = gr.Button('判斷影片圖像')
     update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
@@ -306,9 +281,7 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
         # chatbox
         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
-css_size = """.output-image, .input-image, .image-preview {height: 600px !important} .gradio-container {background-color: #3f7791}"""
-# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
-with gr.Blocks(head = ga_script, css = css_size) as demo2:
+with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
     
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
@@ -319,17 +292,24 @@ with gr.Blocks(head = ga_script, css = css_size) as demo2:
         with gr.Column(scale = 5):
 
             # for image
-            imagebox = gr.Image(type="pil", height=450)
+            imagebox = gr.Image(type="pil", height=500)
             img_clk = gr.Button('生成圖像')
 
         with gr.Column(scale = 5):
 
-            outputs = gr.components.Image(height=500)
-            img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
+            outputs = gr.components.Image(height=400)
+            res = img_clk.click(inference, queue = True, inputs = [imagebox], outputs = [outputs])
             image_process_mode = gr.Radio(
                 ["Crop", "Resize", "Pad", "Default"],
                 value="Default",
                 label="Preprocess for non-square image", visible=False)
+            
+            text_outputs = gr.components.Text()
+            painted_img_clk = gr.Button('判斷生成圖像')
+
+            print(res)
+            painted_img_clk.click(image_mod_v2, inputs = [outputs], outputs = [text_outputs])
+
             
     with gr.Column(scale = 2):  
         cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
