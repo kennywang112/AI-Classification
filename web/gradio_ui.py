@@ -96,20 +96,20 @@ def display_image_from_video(video):
     
     img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
     
-#     # Make predictions
-#     predictions = loaded_model.predict(img_np)
+    # Make predictions
+    predictions = loaded_model.predict(img_np)
     
-#     result = ""
+    result = ""
     
-#     if predictions[0][0] < 0.5:
+    if predictions[0][0] < 0.5:
 
-#         result = "fake image"
-#     else :
+        result = "fake image"
+    else :
         
-#         result = "true image"
+        result = "true image"
 
-#     return result
-    return img_for_plot
+    return result
+    # return img_for_plot
 
 def take_pic():  
     # cam_port = 0
@@ -150,7 +150,8 @@ def Reply(imagebox, message, chat_history):
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
                     ],
                 },
-            ]
+            ],
+            max_tokens=4000,
         )  
         for choice in response.choices:
             result += choice.message.content
@@ -305,37 +306,37 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
         # chatbox
         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
-
-with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
+css_size = """.output-image, .input-image, .image-preview {height: 600px !important} .gradio-container {background-color: #3f7791}"""
+# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
+with gr.Blocks(head = ga_script, css = css_size) as demo2:
     
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
 
     state = gr.State()
-    
-    with gr.Row():
-         
-        with gr.Column(scale = 5):
+                
+    with gr.Column(scale = 4):
 
-            # for image
-            imagebox = gr.Image(type="pil")
-            outputs = gr.components.Image()
-            img_clk = gr.Button('判斷圖像')
-            img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
-            image_process_mode = gr.Radio(
-                ["Crop", "Resize", "Pad", "Default"],
-                value="Default",
-                label="Preprocess for non-square image", visible=False)
-            cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+        # for image
+        imagebox = gr.Image(type="pil")
+        img_clk = gr.Button('生成圖像')
 
-            ex = gr.Examples(examples=[
-                [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
-                [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
-                [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
-            ], inputs = [imagebox, textbox])
+    with gr.Column(scale = 4):
 
+        outputs = gr.components.Image()
+        img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
+        image_process_mode = gr.Radio(
+            ["Crop", "Resize", "Pad", "Default"],
+            value="Default",
+            label="Preprocess for non-square image", visible=False)
+        
+    with gr.Column(scale = 2):  
+        cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
 
-
-# full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
+        ex = gr.Examples(examples=[
+            [f"{cur_dir}/images/fake_face0.jpeg"],
+            [f"{cur_dir}/images/fake_face1.jpeg"],
+            [f"{cur_dir}/images/real_face0.jpeg"],
+        ], inputs = [imagebox])
 
 full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
