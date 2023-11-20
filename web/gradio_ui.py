@@ -24,7 +24,7 @@ itemlist
 keyfile = open("./key.txt", "r")
 key = keyfile.readline()
 
-openai.api_key = key + "R"
+openai.api_key = key + "i"
 
 loaded_model = load_model("./model_epoch_06.h5", compile=False)
 model_config = loaded_model.get_config()
@@ -314,22 +314,23 @@ with gr.Blocks(head = ga_script, css = css_size) as demo2:
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
 
     state = gr.State()
-                
-    with gr.Column(scale = 4):
+    with gr.Row():  
 
-        # for image
-        imagebox = gr.Image(type="pil")
-        img_clk = gr.Button('生成圖像')
+        with gr.Column(scale = 5):
 
-    with gr.Column(scale = 4):
+            # for image
+            imagebox = gr.Image(type="pil", height=450)
+            img_clk = gr.Button('生成圖像')
 
-        outputs = gr.components.Image()
-        img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
-        image_process_mode = gr.Radio(
-            ["Crop", "Resize", "Pad", "Default"],
-            value="Default",
-            label="Preprocess for non-square image", visible=False)
-        
+        with gr.Column(scale = 5):
+
+            outputs = gr.components.Image(height=500)
+            img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
+            image_process_mode = gr.Radio(
+                ["Crop", "Resize", "Pad", "Default"],
+                value="Default",
+                label="Preprocess for non-square image", visible=False)
+            
     with gr.Column(scale = 2):  
         cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
 
