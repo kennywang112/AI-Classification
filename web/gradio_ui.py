@@ -24,7 +24,7 @@ itemlist
 keyfile = open("./key.txt", "r")
 key = keyfile.readline()
 
-openai.api_key = key
+openai.api_key = key + "R"
 
 loaded_model = load_model("./model_epoch_06.h5", compile=False)
 model_config = loaded_model.get_config()
