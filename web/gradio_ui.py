@@ -13,14 +13,6 @@ import base64
 import io
 import torch
 
-
-with open('./data/texes.txt', 'r', encoding='utf-8') as fh:
-    tmp = fh.read()
-    itemlist = tmp.split(',')
-
-itemlist = str(itemlist)
-itemlist
-
 keyfile = open("./key.txt", "r")
 key = keyfile.readline()
 
@@ -113,18 +105,24 @@ def chatbtn(content):
     return content
 
 def display_image_from_video(video):
+    
+    lst = []
+    prediction_vote = []
 
     capture_image = cv2.VideoCapture(video)
-    print(capture_image)
-    # 獲取視頻中的一幀，變數分別為是否成功讀取了一幀以及捕獲的圖像幀
-    ret, frame = capture_image.read()
 
-    img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    img = cv2.resize(img, (256, 256))  # 調整大小
-    img_for_plot = img / 255.0  # 正規化圖像
+    for i in range(9):
+
+        ret, frame = capture_image.read()
+
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (256, 256))  # 調整大小
+        img_for_plot = img / 255.0  # 正規化圖像
     
-    img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
-    
+        img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
+
+        lst.append(tuple([img_np[0], str(i)]))
+
     # Make predictions
     predictions = loaded_model.predict(img_np)
     
@@ -132,33 +130,40 @@ def display_image_from_video(video):
     
     if predictions[0][0] < 0.5:
 
-        result = "fake image"
+        prediction_vote.append(0)
     else :
-        
+
+        prediction_vote.append(1)
+
+    if sum(prediction_vote) > 4:
+
         result = "true image"
+    
+    else:
 
-    return result
-    # return img_for_plot
+        result = "fake image"
 
-def take_pic():  
-    # cam_port = 0
-    cam = cv2.VideoCapture(0) 
-    # reading the input using the camera 
-    result, image = cam.read() 
-    # If image will detected without any error,  
-    # show result 
-    if result:
+    return result, lst
 
-        file_path = 'images/GeeksForGeeks.png'
-        cv2.imwrite(file_path, image)
-        print(f"Image saved as {file_path}")
+# def take_pic():  
+#     # cam_port = 0
+#     cam = cv2.VideoCapture(0) 
+#     # reading the input using the camera 
+#     result, image = cam.read() 
+#     # If image will detected without any error,  
+#     # show result 
+#     if result:
 
-    else: 
-        print("No image detected. Please! try again") 
+#         file_path = 'images/GeeksForGeeks.png'
+#         cv2.imwrite(file_path, image)
+#         print(f"Image saved as {file_path}")
+
+#     else: 
+#         print("No image detected. Please! try again") 
         
-    cam.release()
+#     cam.release()
 
-    return image
+#     return image
 
 def Reply(imagebox, message, chat_history):
     
@@ -167,9 +172,11 @@ def Reply(imagebox, message, chat_history):
     
     start_idx = 0
     result = ''
-    while start_idx < len(itemlist):
-        end_idx = min(start_idx + 1600, len(itemlist))
-        sub_list = itemlist[start_idx:end_idx]
+
+    while start_idx < 14:
+
+        end_idx = min(start_idx + 1600, 14)
+
         response = openai.ChatCompletion.create(
             model="gpt-4-vision-preview",
             messages=[
@@ -215,7 +222,7 @@ def inference(img):
 
 title = """<h1 align="center">AI臉部辨識</h1>"""
 textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
-# <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
+
 ga_script = '''
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
@@ -230,36 +237,52 @@ gtag('config', 'G-Y132VVZPKL');
 
 with gr.Blocks() as small_block1:
 
-    imagebox = gr.Image(type="pil", height=250)
-    outputs = gr.components.Text()
-    img_clk = gr.Button('判斷圖像')
-    img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
-    image_process_mode = gr.Radio(
-        ["Crop", "Resize", "Pad", "Default"],
-        value="Default",
-        label="Preprocess for non-square image", visible=False)
-    cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+    with gr.Row():
+        
+        with gr.Column(scale=3):
 
-    ex = gr.Examples(examples=[
-        [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
-        [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
-    ], inputs = [imagebox, textbox])
+            imagebox = gr.Image(type="pil", height=300)
+            outputs = gr.components.Text()
+            img_clk = gr.Button('判斷圖像')
+            img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
+            image_process_mode = gr.Radio(
+                ["Crop", "Resize", "Pad", "Default"],
+                value="Default",
+                label="Preprocess for non-square image", visible=False)
+            cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+            ex = gr.Examples(examples=[
+                [f"{cur_dir}/images/fake_face0.jpeg", "這張照片有怪異的地方嗎"],
+                [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
+            ], inputs = [imagebox, textbox])
+
+        with gr.Column(scale=7):
+            
+            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=650)
+            
+            with gr.Row():
+                    
+                with gr.Column(scale=1, min_width=50):
+                    
+                    msg = textbox.render()
+        
+        msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
 with gr.Blocks() as small_block2:
 
-    inputs = gr.components.Video(height=400)
-    outputs = gr.components.Text()
-    update = gr.Button('判斷影片圖像')
-    update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
+    with gr.Row():
+        
+        with gr.Column(scale=3):
+            input = gr.components.Video(height=400)
+            outputs = gr.components.Text()
+            update = gr.Button('判斷影片圖像')
 
-with gr.Blocks() as small_block3:
+        with gr.Column(scale=7):
+            
+            gallery = gr.Gallery(
+                label="Captured images", show_label=False, elem_id="gallery"
+            , columns=[3], rows=[4], object_fit="contain", height=570)
 
-    img_output = gr.components.Image()
-    # pic = gr.Button('拍照')
-    # pic.click(take_pic, outputs = [img_output])
-    outputs = gr.components.Text()
-    img_clk = gr.Button('判斷照片')
-    img_clk.click(image_mod_v2, inputs = [img_output], outputs = [outputs])
+        update.click(display_image_from_video, inputs = [input], outputs = [outputs, gallery])
 
 with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
     
@@ -268,23 +291,26 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
 
     state = gr.State()
     
-    with gr.Row():
+    # with gr.Row():
         
-        with gr.Column(scale=3):
+    #     with gr.Column(scale=3):
 
-            gr.TabbedInterface([small_block1, small_block2, small_block3],["圖片", "影片", "拍照"])
+        # gr.TabbedInterface([small_block1, small_block2], ["圖片", "影片"])
             
-        with gr.Column(scale=7):
+        # with gr.Column(scale=7):
             
-            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=650)
+        #     chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=700)
             
-            with gr.Row():
+        #     with gr.Row():
                     
-                with gr.Column(scale=1, min_width=50):
-                    msg = textbox.render()
+        #         with gr.Column(scale=1, min_width=50):
+                    
+        #             msg = textbox.render()
 
-        # chatbox
-        msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
+        # # chatbox
+        # msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
+
+    gr.TabbedInterface([small_block1, small_block2], ["圖片", "影片"])
 
 # with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
     
