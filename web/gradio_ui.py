@@ -147,18 +147,18 @@ def take_pic():
     result, image = cam.read() 
     # If image will detected without any error,  
     # show result 
-    if result: 
-        # showing result, it take frame name and image  
-        # output 
-        cv2.imshow("../images/GeeksForGeeks", image) 
-        # saving image in local storage 
-        # cv2.imwrite("../images/GeeksForGeeks.png", image) 
-        # If keyboard interrupt occurs, destroy image  
-        # window 
-        # cv2.waitKey(0) 
-        # cv2.destroyWindow("GeeksForGeeks") 
+    if result:
+
+        file_path = 'images/GeeksForGeeks.png'
+        cv2.imwrite(file_path, image)
+        print(f"Image saved as {file_path}")
+
     else: 
         print("No image detected. Please! try again") 
+        
+    cam.release()
+
+    return image
 
 def Reply(imagebox, message, chat_history):
     
@@ -242,7 +242,6 @@ with gr.Blocks() as small_block1:
 
     ex = gr.Examples(examples=[
         [f"{cur_dir}/images/fake_face0.jpeg", "你覺得這張圖片是真的還是假的"],
-        [f"{cur_dir}/images/fake_face1.jpeg", "詳細介紹這張圖"],
         [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
     ], inputs = [imagebox, textbox])
 
@@ -252,6 +251,15 @@ with gr.Blocks() as small_block2:
     outputs = gr.components.Text()
     update = gr.Button('判斷影片圖像')
     update.click(display_image_from_video, inputs = [inputs], outputs = [outputs])
+
+with gr.Blocks() as small_block3:
+
+    img_output = gr.components.Image()
+    # pic = gr.Button('拍照')
+    # pic.click(take_pic, outputs = [img_output])
+    outputs = gr.components.Text()
+    img_clk = gr.Button('判斷照片')
+    img_clk.click(image_mod_v2, inputs = [img_output], outputs = [outputs])
 
 with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
     
@@ -264,14 +272,11 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
         
         with gr.Column(scale=3):
 
-            gr.TabbedInterface([small_block1, small_block2],["圖片", "影片"])
-
-            pic = gr.Button('拍照')
-            pic.click(take_pic)
+            gr.TabbedInterface([small_block1, small_block2, small_block3],["圖片", "影片", "拍照"])
             
         with gr.Column(scale=7):
             
-            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=800)
+            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=650)
             
             with gr.Row():
                     
@@ -281,43 +286,45 @@ with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #
         # chatbox
         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
-with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
+# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
     
-    gr.HTML(title)
-    gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
+#     gr.HTML(title)
+#     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
 
-    state = gr.State()
-    with gr.Row():  
+#     state = gr.State()
+#     with gr.Row():  
 
-        with gr.Column(scale = 5):
+#         with gr.Column(scale = 5):
 
-            # for image
-            imagebox = gr.Image(type="pil", height=500)
-            img_clk = gr.Button('生成圖像')
+#             # for image
+#             imagebox = gr.Image(type="pil", height=500)
+#             img_clk = gr.Button('生成圖像')
 
-        with gr.Column(scale = 5):
+#         with gr.Column(scale = 5):
 
-            outputs = gr.components.Image(height=400)
-            res = img_clk.click(inference, queue = True, inputs = [imagebox], outputs = [outputs])
-            image_process_mode = gr.Radio(
-                ["Crop", "Resize", "Pad", "Default"],
-                value="Default",
-                label="Preprocess for non-square image", visible=False)
+#             outputs = gr.components.Image(height=400)
+#             res = img_clk.click(inference, queue = True, inputs = [imagebox], outputs = [outputs])
+#             image_process_mode = gr.Radio(
+#                 ["Crop", "Resize", "Pad", "Default"],
+#                 value="Default",
+#                 label="Preprocess for non-square image", visible=False)
             
-            text_outputs = gr.components.Text()
-            painted_img_clk = gr.Button('判斷生成圖像')
+#             text_outputs = gr.components.Text()
+#             painted_img_clk = gr.Button('判斷生成圖像')
 
-            print(res)
-            painted_img_clk.click(image_mod_v2, inputs = [outputs], outputs = [text_outputs])
+#             print(res)
+#             painted_img_clk.click(image_mod_v2, inputs = [outputs], outputs = [text_outputs])
 
             
-    with gr.Column(scale = 2):  
-        cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
+#     with gr.Column(scale = 2):  
+#         cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
 
-        ex = gr.Examples(examples=[
-            [f"{cur_dir}/images/fake_face0.jpeg"],
-            [f"{cur_dir}/images/fake_face1.jpeg"],
-            [f"{cur_dir}/images/real_face0.jpeg"],
-        ], inputs = [imagebox])
+#         ex = gr.Examples(examples=[
+#             [f"{cur_dir}/images/fake_face0.jpeg"],
+#             [f"{cur_dir}/images/fake_face1.jpeg"],
+#             [f"{cur_dir}/images/real_face0.jpeg"],
+#         ], inputs = [imagebox])
 
-full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
+# full_website = gr.TabbedInterface([demo1, demo2],["測試", "GAN"])
+
+full_website = gr.TabbedInterface([demo1],["測試"])
