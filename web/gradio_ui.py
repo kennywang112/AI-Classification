@@ -223,19 +223,20 @@ def inference(img):
 title = """<h1 align="center">AI臉部辨識</h1>"""
 textbox = gr.Textbox(show_label=False, placeholder="Enter text and press ENTER", container=False)
 
-ga_script = '''
-<!-- Google tag (gtag.js) -->
+ga_script = """
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y132VVZPKL"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
+"""
+ga_load = """
+function() {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-gtag('config', 'G-Y132VVZPKL');
-</script>
-'''
+  gtag('config', 'G-Y132VVZPKL');
+}
+"""
 
-with gr.Blocks() as small_block1:
+with gr.Blocks(head = ga_script) as small_block1:
 
     with gr.Row():
         
@@ -267,7 +268,9 @@ with gr.Blocks() as small_block1:
         
         msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
-with gr.Blocks() as small_block2:
+    small_block1.load(None, js = ga_load)
+
+with gr.Blocks(head = ga_script) as small_block2:
 
     with gr.Row():
         
@@ -284,34 +287,18 @@ with gr.Blocks() as small_block2:
 
         update.click(display_image_from_video, inputs = [input], outputs = [outputs, gallery])
 
-with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo1:
+    small_block2.load(None, js = ga_load)
+
+with gr.Blocks(head = ga_script) as demo1:
     
     gr.HTML(title)
     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
 
     state = gr.State()
-    
-    # with gr.Row():
-        
-    #     with gr.Column(scale=3):
-
-        # gr.TabbedInterface([small_block1, small_block2], ["圖片", "影片"])
-            
-        # with gr.Column(scale=7):
-            
-        #     chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=700)
-            
-        #     with gr.Row():
-                    
-        #         with gr.Column(scale=1, min_width=50):
-                    
-        #             msg = textbox.render()
-
-        # # chatbox
-        # msg.submit(Reply, [imagebox, msg, chatbot], [msg, chatbot])
 
     gr.TabbedInterface([small_block1, small_block2], ["圖片", "影片"])
 
+    demo1.load(None, js = ga_load)
 # with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
     
 #     gr.HTML(title)
