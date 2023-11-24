@@ -18,7 +18,8 @@ key = keyfile.readline()
 
 openai.api_key = key + "i"
 
-loaded_model = load_model("./model_epoch_06.h5", compile=False)
+# loaded_model = load_model("./model_epoch_06.h5", compile=False)
+loaded_model = load_model("./model.h5", compile=False)
 model_config = loaded_model.get_config()
 
 def encode_image(image_object):
@@ -36,7 +37,8 @@ def encode_image(image_object):
 def pred(img):
 
     # Resize the image to match the input shape of your model
-    img = img.resize((256, 256))  # Adjust the size as needed
+    # img = img.resize((256, 256))  # Adjust the size as needed
+    img = img.resize((224, 224))  # Adjust the size as needed
     # Convert the image to a NumPy array
     img_np = np.array(img)
     
@@ -54,13 +56,12 @@ def pred(img):
 
 def image_mod(img):
     
-    print(img)
     image, predictions = pred(img)
-
-    print(predictions)
     
     result = ""
     
+    print('pred: ',predictions)
+
     if predictions[0][0] < 0.5:
 
         result = "fake image"
@@ -72,7 +73,8 @@ def image_mod(img):
 
 def pred_v2(img_np):
 
-    img_np = cv2.resize(img_np, (256, 256))
+    # img_np = cv2.resize(img_np, (256, 256))
+    img_np = cv2.resize(img_np, (224, 224))
     
     img_for_plot = img_np / 255.0  # Normalize the image if necessary
     
@@ -100,8 +102,6 @@ def image_mod_v2(img):
 
 def chatbtn(content):
     
-    print(content)
-    
     return content
 
 def display_image_from_video(video):
@@ -116,7 +116,8 @@ def display_image_from_video(video):
         ret, frame = capture_image.read()
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (256, 256))  # 調整大小
+        # img = cv2.resize(img, (256, 256))  # 調整大小
+        img = cv2.resize(img, (224, 224))  # 調整大小
         img_for_plot = img / 255.0  # 正規化圖像
     
         img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
@@ -149,8 +150,6 @@ def Reply(imagebox, message, chat_history):
     
     # Getting the base64 string
     base64_image = encode_image(imagebox)
-
-    print(base64_image)
     
     start_idx = 0
     result = ''
@@ -182,9 +181,8 @@ def Reply(imagebox, message, chat_history):
     read_output = output.read()
     
     chat_history.append((message, read_output))
-    print(chat_history)
-    
-    time.sleep(10)
+
+    # time.sleep(10)
     
     return "", chat_history
 
@@ -311,7 +309,7 @@ with gr.Blocks(head = ga_script) as demo1:
 
     state = gr.State()
 
-    gr.TabbedInterface([small_block1, small_block2, small_block3], ["圖片s", "影片", "GAN"])
+    gr.TabbedInterface([small_block1, small_block2, small_block3], ["圖片", "影片", "GAN"])
 
     demo1.load(None, js = ga_load)
 
