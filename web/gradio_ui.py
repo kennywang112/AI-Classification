@@ -145,30 +145,12 @@ def display_image_from_video(video):
 
     return result, lst
 
-# def take_pic():  
-#     # cam_port = 0
-#     cam = cv2.VideoCapture(0) 
-#     # reading the input using the camera 
-#     result, image = cam.read() 
-#     # If image will detected without any error,  
-#     # show result 
-#     if result:
-
-#         file_path = 'images/GeeksForGeeks.png'
-#         cv2.imwrite(file_path, image)
-#         print(f"Image saved as {file_path}")
-
-#     else: 
-#         print("No image detected. Please! try again") 
-        
-#     cam.release()
-
-#     return image
-
 def Reply(imagebox, message, chat_history):
     
     # Getting the base64 string
     base64_image = encode_image(imagebox)
+
+    print(base64_image)
     
     start_idx = 0
     result = ''
@@ -207,7 +189,6 @@ def Reply(imagebox, message, chat_history):
     return "", chat_history
 
 # GAN
-
 model = torch.hub.load("AK391/animegan2-pytorch:main", "generator", pretrained="face_paint_512_v1")
 face2paint = torch.hub.load(
     'AK391/animegan2-pytorch:main', 'face2paint', 
@@ -252,8 +233,8 @@ with gr.Blocks(head = ga_script) as small_block1:
                 label="Preprocess for non-square image", visible=False)
             cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
             ex = gr.Examples(examples=[
-                [f"{cur_dir}/images/fake_face0.jpeg", "這張照片有怪異的地方嗎"],
-                [f"{cur_dir}/images/real_face0.jpeg", "形容這張圖片"],
+                [f"{cur_dir}/images/fake_face0.jpeg", "這有什麼不尋常的地方嗎"],
+                [f"{cur_dir}/images/real_face0.jpeg", "詳細形容他"],
             ], inputs = [imagebox, textbox])
 
         with gr.Column(scale=7):
@@ -302,7 +283,7 @@ with gr.Blocks(head = ga_script) as small_block3:
         with gr.Column(scale = 5):
 
             outputs = gr.components.Image(height=400)
-            res = img_clk.click(inference, queue = True, inputs = [imagebox], outputs = [outputs])
+            res = img_clk.click(inference, inputs = [imagebox], outputs = [outputs])
             image_process_mode = gr.Radio(
                 ["Crop", "Resize", "Pad", "Default"],
                 value="Default",
@@ -311,7 +292,6 @@ with gr.Blocks(head = ga_script) as small_block3:
             text_outputs = gr.components.Text()
             painted_img_clk = gr.Button('判斷生成圖像')
 
-            print(res)
             painted_img_clk.click(image_mod_v2, inputs = [outputs], outputs = [text_outputs])
             
     with gr.Column(scale = 2):  
@@ -323,55 +303,16 @@ with gr.Blocks(head = ga_script) as small_block3:
             [f"{cur_dir}/images/real_face0.jpeg"],
         ], inputs = [imagebox])
 
-    small_block2.load(None, js = ga_load)
+    small_block3.load(None, js = ga_load)
 
 with gr.Blocks(head = ga_script) as demo1:
     
     gr.HTML(title)
-    gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
 
     state = gr.State()
 
-    gr.TabbedInterface([small_block1, small_block2, small_block3], ["圖片", "影片", "GAN"])
+    gr.TabbedInterface([small_block1, small_block2, small_block3], ["圖片s", "影片", "GAN"])
 
     demo1.load(None, js = ga_load)
-
-# with gr.Blocks(head = ga_script, css = """.gradio-container {background-color: #3f7791}""") as demo2:
-    
-#     gr.HTML(title)
-#     gr.HTML('''<center><a href="https://github.com/kennywang112?tab=repositories" alt="GitHub Repo"></a></center>''')
-
-#     state = gr.State()
-#     with gr.Row():  
-
-#         with gr.Column(scale = 5):
-
-#             # for image
-#             imagebox = gr.Image(type="pil", height=500)
-#             img_clk = gr.Button('生成圖像')
-
-#         with gr.Column(scale = 5):
-
-#             outputs = gr.components.Image(height=400)
-#             res = img_clk.click(inference, queue = True, inputs = [imagebox], outputs = [outputs])
-#             image_process_mode = gr.Radio(
-#                 ["Crop", "Resize", "Pad", "Default"],
-#                 value="Default",
-#                 label="Preprocess for non-square image", visible=False)
-            
-#             text_outputs = gr.components.Text()
-#             painted_img_clk = gr.Button('判斷生成圖像')
-
-#             print(res)
-#             painted_img_clk.click(image_mod_v2, inputs = [outputs], outputs = [text_outputs])
-
-            
-#     with gr.Column(scale = 2):  
-#         cur_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath("__file__"))))
-
-#         ex = gr.Examples(examples=[
-#             [f"{cur_dir}/images/fake_face0.jpeg"],
-#             [f"{cur_dir}/images/real_face0.jpeg"],
-#         ], inputs = [imagebox])
 
 full_website = gr.TabbedInterface([demo1],["測試"])
