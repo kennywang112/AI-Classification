@@ -1,0 +1,5 @@
+web/__pycache__
+.ipynb_checkpoints
+__pycache__
+hackathon.ipynb
+model_trainer.ipynb
