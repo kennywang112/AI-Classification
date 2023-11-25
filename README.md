@@ -7,6 +7,7 @@
 - Add Google Analytics
 
 ### Start in web file
+install: `pip install -r requirements.txt`
 run with `uvicorn web.run:app --reload`
 
 ## Deploy on website

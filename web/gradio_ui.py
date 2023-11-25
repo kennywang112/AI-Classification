@@ -201,6 +201,7 @@ face2paint = torch.hub.load(
 def inference(img):
     
     out = face2paint(model, img)
+    # out = model(img)
 
     return out
 
