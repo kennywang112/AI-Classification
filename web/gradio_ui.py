@@ -56,6 +56,7 @@ def pred(img):
 def image_mod(img):
     
     image, predictions = pred(img)
+    print(predictions)
     
     preds = np.argmax(predictions)
 
@@ -125,17 +126,19 @@ def display_image_from_video(video):
 
         lst.append(tuple([img_np[0], str(i)]))
 
-    # Make predictions
-    predictions = loaded_model.predict(img_np)
-    
-    result = ""
-    
-    if predictions[0][0] < 0.5:
+        # Make predictions
+        predictions = loaded_model.predict(img_np)
 
-        prediction_vote.append(0)
-    else :
+        preds = np.argmax(predictions)
+        
+        result = ""
+        
+        if preds == 1:
 
-        prediction_vote.append(1)
+            prediction_vote.append(1)
+        else :
+
+            prediction_vote.append(0)
 
     if sum(prediction_vote) > 4:
 
