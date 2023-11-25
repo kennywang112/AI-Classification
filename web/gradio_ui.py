@@ -37,8 +37,7 @@ def encode_image(image_object):
 def pred(img):
 
     # Resize the image to match the input shape of your model
-    # img = img.resize((256, 256))  # Adjust the size as needed
-    img = img.resize((96, 96))  # Adjust the size as needed
+    img = img.resize((224, 224))  # Adjust the size as needed
     # Convert the image to a NumPy array
     img_np = np.array(img)
     
@@ -59,24 +58,22 @@ def image_mod(img):
     image, predictions = pred(img)
     
     preds = np.argmax(predictions)
-    print("pred: ", predictions)
-    print('this is for arg: ', preds)
 
     result = ""
 
-    if predictions[0][0] < 0.5:
+    if preds == 1:
 
-        result = "fake image"
+        result = "true image"
     else :
         
-        result = "true image"
+        result = "fake image"
 
     return result
 
 def pred_v2(img_np):
 
     # img_np = cv2.resize(img_np, (256, 256))
-    img_np = cv2.resize(img_np, (96, 96))
+    img_np = cv2.resize(img_np, (224, 224))
     
     img_for_plot = img_np / 255.0  # Normalize the image if necessary
     
@@ -92,16 +89,15 @@ def image_mod_v2(img):
     image, predictions = pred_v2(img)
 
     preds = np.argmax(predictions)
-    print('this is for arg: ',preds)
 
     result = ""
     
-    if predictions[0][0] < 0.5:
+    if preds == 1:
 
-        result = "fake image"
+        result = "true image"
     else :
         
-        result = "true image"
+        result = "fake image"
 
     return result
 
@@ -122,7 +118,7 @@ def display_image_from_video(video):
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # img = cv2.resize(img, (256, 256))  # 調整大小
-        img = cv2.resize(img, (96, 96))  # 調整大小
+        img = cv2.resize(img, (224, 224))  # 調整大小
         img_for_plot = img / 255.0  # 正規化圖像
     
         img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
