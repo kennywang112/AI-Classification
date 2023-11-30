@@ -5,6 +5,7 @@
 - API from chatgpt to describe the Image, or video.
 - Deploy on website
 - Add Google Analytics
+- MySQL store
 
 ### Start in web file
 install: `pip install -r requirements.txt`
