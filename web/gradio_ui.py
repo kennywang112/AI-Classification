@@ -12,6 +12,7 @@ import time
 import base64
 import io
 import torch
+import pymysql
 
 keyfile = open("./key.txt", "r")
 key = keyfile.readline()
@@ -163,8 +164,8 @@ def Reply(imagebox, message, chat_history):
         end_idx = min(start_idx + 1600, 14)
 
         response = openai.ChatCompletion.create(
-            model="gpt-4-vision-preview",
-            messages=[
+            model = "gpt-4-vision-preview",
+            messages = [
                 {"role": "system", "content": "You are a chatbot"},
                 {"role": "user", "content": [
                     {"type": "text", "text": message},
@@ -189,6 +190,19 @@ def Reply(imagebox, message, chat_history):
     # time.sleep(10)
     
     return "", chat_history
+
+def Store(img):
+        
+    img_Contents = base64.b64encode(img)#轉成byte object
+    img_Contents = str(img_Contents,'utf-8')
+    conn = pymysql.connect(host='127.0.0.1',user="root", passwd="A123456",db='PIC',charset='UTF8')
+    cursor = conn.cursor()#使用該連接創建並連接
+    sql="UPDATE uploadsmallrange SET id=(%s) WHERE dates=(%s)"
+    val=(img_Contents,('m'))
+    cursor.execute(sql,val)#執行數據庫和命令
+    conn.commit()#提交
+    cursor.close()
+    conn.close()
 
 # GAN
 model = torch.hub.load("AK391/animegan2-pytorch:main", "generator", pretrained="face_paint_512_v1")
@@ -230,6 +244,9 @@ with gr.Blocks(head = ga_script) as small_block1:
             outputs = gr.components.Text()
             img_clk = gr.Button('判斷圖像')
             img_clk.click(image_mod, inputs = [imagebox], outputs = [outputs])
+            store_clk = gr.Button('圖像存儲')
+            store_clk.click(Store, inputs = [imagebox])
+
             image_process_mode = gr.Radio(
                 ["Crop", "Resize", "Pad", "Default"],
                 value="Default",
@@ -242,7 +259,7 @@ with gr.Blocks(head = ga_script) as small_block1:
 
         with gr.Column(scale=7):
             
-            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=650)
+            chatbot = gr.Chatbot(elem_id="chatbot", label="Chatbot", height=700)
             
             with gr.Row():
                     
