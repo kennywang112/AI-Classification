@@ -193,14 +193,14 @@ def Reply(imagebox, message, chat_history):
 
 def Store(img):
         
-    img_Contents = base64.b64encode(img)#轉成byte object
+    img_Contents = base64.b64encode(img) # 轉成byte object
     img_Contents = str(img_Contents,'utf-8')
     conn = pymysql.connect(host='127.0.0.1',user="root", passwd="A123456",db='PIC',charset='UTF8')
-    cursor = conn.cursor()#使用該連接創建並連接
+    cursor = conn.cursor()# 使用該連接創建並連接
     sql="UPDATE uploadsmallrange SET id=(%s) WHERE dates=(%s)"
     val=(img_Contents,('m'))
-    cursor.execute(sql,val)#執行數據庫和命令
-    conn.commit()#提交
+    cursor.execute(sql,val) # 執行數據庫和命令
+    conn.commit() # 提交
     cursor.close()
     conn.close()
 
