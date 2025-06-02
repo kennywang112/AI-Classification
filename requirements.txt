@@ -1,0 +1,11 @@
+gradio==4.4.1
+gradio_client==0.7.0
+numpy==1.22.4
+openai==0.28.1
+tensorflow==2.9.1
+tensorflow-estimator==2.9.0
+tensorflow-hub==0.16.1
+tensorflow-io-gcs-filesystem==0.31.0
+torch==2.1.1
+pymysql==1.1.0
+pandas==2.2.0

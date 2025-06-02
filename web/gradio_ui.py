@@ -1,35 +1,33 @@
-import pickle
-from PIL import Image
+import os
+import io
+import cv2
+import torch
+import openai
+import base64
+import pymysql
 import numpy as np
+import gradio as gr
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
-import matplotlib.pyplot as plt
-import gradio as gr
+
+
+from dotenv import load_dotenv
 import os
-import openai
-import cv2
-import time
-import base64
-import io
-import torch
-import pymysql
 
-keyfile = open("./key.txt", "r")
-key = keyfile.readline()
+load_dotenv()
 
-openai.api_key = key + "i"
+openai.api_key = os.getenv('KEY')
 
 # loaded_model = load_model("./model_epoch_06.h5", compile=False)
 loaded_model = load_model("./model.h5", compile=False)
 model_config = loaded_model.get_config()
 
 def encode_image(image_object):
+
     # Create a BytesIO object to hold the image data
     image_bytes = io.BytesIO()
-
     # Save the PIL image to the BytesIO object
     image_object.save(image_bytes, format='JPEG')  # Adjust the format as needed
-
     # Encode the image data in base64
     encoded_image = base64.b64encode(image_bytes.getvalue()).decode('utf-8')
 
@@ -41,14 +39,10 @@ def pred(img):
     img = img.resize((224, 224))  # Adjust the size as needed
     # Convert the image to a NumPy array
     img_np = np.array(img)
-    
     # Preprocess the image to match the model's input requirements
     img_np = image.img_to_array(img_np)
-    
     img_for_plot = img_np / 255.0  # Normalize the image if necessary
-    
     img_np = np.expand_dims(img_np, axis=0)  # Add a batch dimension
-    
     # Make predictions
     predictions = loaded_model.predict(img_np)
     
@@ -57,17 +51,12 @@ def pred(img):
 def image_mod(img):
     
     image, predictions = pred(img)
-    print(predictions)
-    
     preds = np.argmax(predictions)
-
     result = ""
 
     if preds == 1:
-
         result = "true image"
     else :
-        
         result = "fake image"
 
     return result
@@ -76,11 +65,8 @@ def pred_v2(img_np):
 
     # img_np = cv2.resize(img_np, (256, 256))
     img_np = cv2.resize(img_np, (224, 224))
-    
     img_for_plot = img_np / 255.0  # Normalize the image if necessary
-    
     img_np = np.expand_dims(img_np, axis=0)  # Add a batch dimension
-    
     # Make predictions
     predictions = loaded_model.predict(img_np)
     
@@ -89,16 +75,12 @@ def pred_v2(img_np):
 def image_mod_v2(img):
 
     image, predictions = pred_v2(img)
-
     preds = np.argmax(predictions)
-
     result = ""
     
     if preds == 1:
-
         result = "true image"
     else :
-        
         result = "fake image"
 
     return result
@@ -111,42 +93,32 @@ def display_image_from_video(video):
     
     lst = []
     prediction_vote = []
-
     capture_image = cv2.VideoCapture(video)
 
     for i in range(9):
 
         ret, frame = capture_image.read()
-
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # img = cv2.resize(img, (256, 256))  # 調整大小
         img = cv2.resize(img, (224, 224))  # 調整大小
         img_for_plot = img / 255.0  # 正規化圖像
-    
         img_np = np.expand_dims(img, axis=0)  # Add a batch dimension
-
         lst.append(tuple([img_np[0], str(i)]))
 
         # Make predictions
         predictions = loaded_model.predict(img_np)
-
         preds = np.argmax(predictions)
-        
         result = ""
         
         if preds == 1:
-
             prediction_vote.append(1)
         else :
-
             prediction_vote.append(0)
 
     if sum(prediction_vote) > 4:
-
         result = "true image"
     
     else:
-
         result = "fake image"
 
     return result, lst
@@ -155,14 +127,12 @@ def Reply(imagebox, message, chat_history):
     
     # Getting the base64 string
     base64_image = encode_image(imagebox)
-    
     start_idx = 0
     result = ''
 
     while start_idx < 14:
 
         end_idx = min(start_idx + 1600, 14)
-
         response = openai.ChatCompletion.create(
             model = "gpt-4-vision-preview",
             messages = [
@@ -174,7 +144,8 @@ def Reply(imagebox, message, chat_history):
                 },
             ],
             max_tokens=4000,
-        )  
+        )
+
         for choice in response.choices:
             result += choice.message.content
         start_idx = end_idx
@@ -205,9 +176,9 @@ def Store(img):
     conn.close()
 
 # GAN
-model = torch.hub.load("AK391/animegan2-pytorch:main", "generator", pretrained="face_paint_512_v1")
+model = torch.hub.load("bryandlee/animegan2-pytorch:main", "generator", pretrained="face_paint_512_v1")
 face2paint = torch.hub.load(
-    'AK391/animegan2-pytorch:main', 'face2paint', 
+    'bryandlee/animegan2-pytorch:main', 'face2paint', 
     size=512,side_by_side=False
 )
 
@@ -328,11 +299,8 @@ with gr.Blocks(head = ga_script) as small_block3:
 with gr.Blocks(head = ga_script) as demo1:
     
     gr.HTML(title)
-
     state = gr.State()
-
     gr.TabbedInterface([small_block1, small_block2, small_block3], ["圖片", "影片", "GAN"])
-
     demo1.load(None, js = ga_load)
 
 full_website = gr.TabbedInterface([demo1],["測試"])
